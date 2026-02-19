@@ -1,51 +1,20 @@
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { AppModule } from './app.module';
-import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+// Minimal test to verify Hostinger works, then restore NestJS
+const http = require('http');
 
-async function bootstrap() {
-  const logger = new Logger('Bootstrap');
+const port = process.env.PORT || 3000;
 
-  try {
-    const app = await NestFactory.create(AppModule, { logger: ['error', 'warn', 'log'] });
-    const configService = app.get(ConfigService);
+const server = http.createServer((req: any, res: any) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({
+    status: 'ok',
+    message: 'Exam OMR API is running',
+    port: port,
+    env: process.env.NODE_ENV || 'unknown',
+    path: req.url,
+    time: new Date().toISOString(),
+  }));
+});
 
-    try {
-      const helmet = await import('helmet');
-      app.use(helmet.default());
-    } catch {
-      logger.warn('helmet ไม่สามารถโหลดได้ ข้ามไป');
-    }
-
-    app.enableCors({
-      origin: '*',
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-      credentials: true,
-    });
-
-    app.setGlobalPrefix('api');
-
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-        transformOptions: { enableImplicitConversion: true },
-      }),
-    );
-
-    app.useGlobalFilters(new AllExceptionsFilter());
-
-    // Hostinger uses PORT env var - prioritize it
-    const port = process.env.PORT || configService.get<number>('app.port') || 3000;
-    await app.listen(port, '0.0.0.0');
-    logger.log(`เซิร์ฟเวอร์เริ่มทำงานที่พอร์ต ${port}`);
-    logger.log(`สภาพแวดล้อม: ${configService.get<string>('app.nodeEnv')}`);
-  } catch (error) {
-    console.error('FATAL: Bootstrap failed:', error);
-    process.exit(1);
-  }
-}
-
-bootstrap();
+server.listen(port, '0.0.0.0', () => {
+  console.log(`Server running on port ${port}`);
+});
