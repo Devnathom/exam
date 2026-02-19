@@ -19,7 +19,8 @@ async function bootstrap() {
     }
 
     app.enableCors({
-      origin: configService.get<string>('app.corsOrigin') || '*',
+      origin: '*',
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       credentials: true,
     });
 
@@ -36,13 +37,13 @@ async function bootstrap() {
 
     app.useGlobalFilters(new AllExceptionsFilter());
 
-    const port = configService.get<number>('app.port') || process.env.PORT || 4000;
+    // Hostinger uses PORT env var - prioritize it
+    const port = process.env.PORT || configService.get<number>('app.port') || 3000;
     await app.listen(port, '0.0.0.0');
     logger.log(`เซิร์ฟเวอร์เริ่มทำงานที่พอร์ต ${port}`);
     logger.log(`สภาพแวดล้อม: ${configService.get<string>('app.nodeEnv')}`);
   } catch (error) {
-    const logger = new Logger('Bootstrap');
-    logger.error('เกิดข้อผิดพลาดในการเริ่มต้น:', error);
+    console.error('FATAL: Bootstrap failed:', error);
     process.exit(1);
   }
 }

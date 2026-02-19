@@ -17,8 +17,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   async onModuleInit() {
-    await this.$connect();
-    this.logger.log('เชื่อมต่อฐานข้อมูลสำเร็จ');
+    try {
+      await this.$connect();
+      this.logger.log('เชื่อมต่อฐานข้อมูลสำเร็จ');
+    } catch (error) {
+      this.logger.error('ไม่สามารถเชื่อมต่อฐานข้อมูลได้:', error);
+    }
   }
 
   async onModuleDestroy() {
