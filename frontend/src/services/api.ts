@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const API_URL = '/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -26,7 +26,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          const { data } = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
+          const { data } = await axios.post('/api/auth/refresh', { refreshToken });
           localStorage.setItem('accessToken', data.accessToken);
           localStorage.setItem('refreshToken', data.refreshToken);
           originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
@@ -81,19 +81,21 @@ export const scannerApi = {
   submit: (data: {
     examId: string;
     studentCode: string;
-    versionCode: string;
+    versionCode?: string;
+    examVersionId?: string;
     answers: Record<string, string>;
-    schoolId: string;
+    schoolId?: string;
   }) => api.post('/scanner/submit', data),
-  getStats: (examId: string) => api.get(`/scanner/stats/${examId}`),
 };
 
 export const resultsApi = {
   getByExam: (examId: string, params?: Record<string, any>) =>
-    api.get(`/results/exam/${examId}`, { params }),
-  getByStudent: (studentId: string) => api.get(`/results/student/${studentId}`),
+    api.get('/results', { params: { ...params, examId } }),
   getOne: (id: string) => api.get(`/results/${id}`),
-  exportExam: (examId: string) => api.get(`/results/exam/${examId}/export`),
+};
+
+export const dashboardApi = {
+  getStats: () => api.get('/dashboard'),
 };
 
 export default api;
