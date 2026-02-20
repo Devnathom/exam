@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "npm install && npx prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
@@ -26,6 +27,7 @@
     "react-hot-toast": "^2.4.1",
     "recharts": "^2.10.4",
     "socket.io-client": "^4.7.4",
+    "tsx": "^4.21.0",
     "zustand": "^4.5.0"
   },
   "devDependencies": {
